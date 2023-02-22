@@ -64,6 +64,11 @@ export class FormComponent implements OnDestroy, OnInit {
   @Input() cancelLabel = 'form.cancel';
 
   /**
+   * Value of property disabled
+   */
+  @Input() disabled: boolean = false;
+
+  /**
    * An array of DynamicFormControlModel type
    */
   @Input() formModel: DynamicFormControlModel[];
@@ -152,6 +157,12 @@ export class FormComponent implements OnDestroy, OnInit {
         }
       });
     }
+
+    this.formModel.forEach(
+      (fm: DynamicFormControlModel) => {
+        fm.disabled = this.disabled;
+      }
+    )
 
     this.formService.initForm(this.formId, this.formModel, this.getFormGroupValidStatus());
 

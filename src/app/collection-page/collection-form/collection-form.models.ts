@@ -50,3 +50,44 @@ export const collectionFormModels: DynamicFormControlModel[] = [
     spellCheck: environment.form.spellCheck,
   })
 ];
+
+export function createCollectionFormModels(lang: string): DynamicFormControlModel[] {
+  return [
+    new DynamicInputModel({
+      id: 'title-' + lang,
+      name: 'dc.title',
+      required: true,
+      validators: {
+        required: null
+      },
+      errorMessages: {
+        required: 'Please enter a name for this title'
+      },
+    }),
+    new DynamicTextAreaModel({
+      id: 'description-' + lang,
+      name: 'dc.description',
+      spellCheck: environment.form.spellCheck,
+    }),
+    new DynamicTextAreaModel({
+      id: 'abstract-' + lang,
+      name: 'dc.description.abstract',
+      spellCheck: environment.form.spellCheck,
+    }),
+    new DynamicTextAreaModel({
+      id: 'rights-' + lang,
+      name: 'dc.rights',
+      spellCheck: environment.form.spellCheck,
+    }),
+    new DynamicTextAreaModel({
+      id: 'tableofcontents-' + lang,
+      name: 'dc.description.tableofcontents',
+      spellCheck: environment.form.spellCheck,
+    }),
+    new DynamicTextAreaModel({
+      id: 'license-' + lang,
+      name: 'dc.rights.license',
+      spellCheck: environment.form.spellCheck,
+    })
+  ];
+}

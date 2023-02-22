@@ -3,7 +3,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import {
-  DynamicFormControlModel,
   DynamicFormOptionConfig,
   DynamicFormService,
   DynamicSelectModel
@@ -20,8 +19,11 @@ import { EntityTypeDataService } from '../../core/data/entity-type-data.service'
 import { ItemType } from '../../core/shared/item-relationships/item-type.model';
 import { MetadataValue } from '../../core/shared/metadata.models';
 import { getFirstSucceededRemoteListPayload } from '../../core/shared/operators';
-import { collectionFormEntityTypeSelectionConfig, collectionFormModels, } from './collection-form.models';
+import { collectionFormEntityTypeSelectionConfig, collectionFormModels, createCollectionFormModels, } from './collection-form.models';
 import { NONE_ENTITY_TYPE } from '../../core/shared/item-relationships/item-type.resource-type';
+import { LangConfig } from 'src/config/lang-config.interface';
+import { FormModels } from 'src/app/shared/comcol/comcol-forms/comcol-form/FormModels';
+import { environment } from 'src/environments/environment';
 
 /**
  * Form used for creating and editing collections
@@ -49,10 +51,12 @@ export class CollectionFormComponent extends ComColFormComponent<Collection> imp
   entityTypeSelection: DynamicSelectModel<string> = new DynamicSelectModel(collectionFormEntityTypeSelectionConfig);
 
   /**
-   * The dynamic form fields used for creating/editing a collection
-   * @type {DynamicFormControlModel[]}
+   * The form models that represents the fields in the form
    */
-  formModel: DynamicFormControlModel[];
+  formModels: FormModels[] = [];
+
+  // All of the languages
+  languages: LangConfig[];
 
   public constructor(protected formService: DynamicFormService,
                      protected translate: TranslateService,
@@ -66,6 +70,7 @@ export class CollectionFormComponent extends ComColFormComponent<Collection> imp
   }
 
   ngOnInit() {
+    this.languages = environment.languages.filter((MyLangConfig) => MyLangConfig.active === true);
 
     let currentRelationshipValue: MetadataValue[];
     if (this.dso && this.dso.metadata) {
@@ -93,10 +98,19 @@ export class CollectionFormComponent extends ComColFormComponent<Collection> imp
           }
         });
 
-        this.formModel = [...collectionFormModels, this.entityTypeSelection];
+        if(this.languages) {
+          this.languages.forEach(
+            (language: LangConfig) => {
+              let fm: FormModels = {
+                forms: [...createCollectionFormModels(language.code), this.entityTypeSelection],
+                language: language.code
+              }
+              this.formModels.push(fm);
+            }
+          )
+        }
 
         super.ngOnInit();
     });
-
   }
 }

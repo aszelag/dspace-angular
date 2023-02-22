@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { DynamicFormControlModel, DynamicFormService, DynamicInputModel } from '@ng-dynamic-forms/core';
+import { DynamicFormControlModel, DynamicFormService, DynamicInputModel, DynamicTextAreaModel } from '@ng-dynamic-forms/core';
 import { TranslateService } from '@ngx-translate/core';
 import { FileUploader } from 'ng2-file-upload';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Subscription } from 'rxjs';
@@ -22,6 +22,9 @@ import { UploaderComponent } from '../../../upload/uploader/uploader.component';
 import { Operation } from 'fast-json-patch';
 import { NoContent } from '../../../../core/shared/NoContent.model';
 import { getFirstCompletedRemoteData } from '../../../../core/shared/operators';
+import { LangConfig } from 'src/config/lang-config.interface';
+import { FormModels } from './FormModels';
+import { Language } from '@material-ui/icons';
 
 /**
  * A form for creating and editing Communities or Collections
@@ -59,14 +62,28 @@ export class ComColFormComponent<T extends Collection | Community> implements On
   ERROR_KEY_PREFIX = '.form.errors.';
 
   /**
-   * The form model that represents the fields in the form
+   * The current page outlet string
    */
-  formModel: DynamicFormControlModel[];
+  defaultLanguage: string = 'en';
 
   /**
-   * The form group of this form
+   * The current page outlet string
    */
-  formGroup: FormGroup;
+  currentLanguage: string = 'en';
+
+
+  // All of the languages
+  languages: LangConfig[];
+
+  /**
+   * The form models that represents the fields in the form
+   */
+  formModels: FormModels[] = [];
+
+  /**
+   * The forms group of this form
+   */
+  formGroups: FormGroup[] = [];
 
   /**
    * The uploader configuration options
@@ -127,12 +144,22 @@ export class ComColFormComponent<T extends Collection | Community> implements On
   }
 
   ngOnInit(): void {
-    this.formModel.forEach(
-      (fieldModel: DynamicInputModel) => {
-        fieldModel.value = this.dso.firstMetadataValue(fieldModel.name);
+    this.formModels.forEach(
+      (fm: FormModels) => {
+        fm.forms.forEach(
+          (fieldModel: DynamicInputModel) => {
+            fieldModel.value = this.dso.firstMetadataValue(fieldModel.name);
+          }
+        )
       }
-    );
-    this.formGroup = this.formService.createFormGroup(this.formModel);
+    )
+
+    this.formModels.forEach(
+      (fm: FormModels) => {
+        let fg = this.formService.createFormGroup(fm.forms);
+        this.formGroups.push(fg);
+      }
+    )
 
     this.updateFieldTranslations();
     this.translate.onLangChange
@@ -189,17 +216,24 @@ export class ComColFormComponent<T extends Collection | Community> implements On
     }
 
     const formMetadata = {}  as MetadataMap;
-    this.formModel.forEach((fieldModel: DynamicInputModel) => {
-      const value: MetadataValue = {
-        value: fieldModel.value as string,
-        language: null
-      } as any;
-      if (formMetadata.hasOwnProperty(fieldModel.name)) {
-        formMetadata[fieldModel.name].push(value);
-      } else {
-        formMetadata[fieldModel.name] = [value];
+    this.formModels.forEach(
+      (fm: FormModels) => {
+        let lang = fm.language;
+        fm.forms.forEach(
+          (fieldModel: DynamicInputModel) => {
+            const value: MetadataValue = {
+              value: fieldModel.value as string,
+              language: lang
+            } as any;
+            if (formMetadata.hasOwnProperty(fieldModel.name)) {
+              formMetadata[fieldModel.name].push(value);
+            } else {
+              formMetadata[fieldModel.name] = [value];
+            }
+          }
+        )
       }
-    });
+    )
 
     const updatedDSO = Object.assign({}, this.dso, {
       metadata: {
@@ -210,42 +244,59 @@ export class ComColFormComponent<T extends Collection | Community> implements On
     });
 
     const operations: Operation[] = [];
-    this.formModel.forEach((fieldModel: DynamicInputModel) => {
-      if (fieldModel.value !== this.dso.firstMetadataValue(fieldModel.name)) {
-        operations.push({
-          op: 'replace',
-          path: `/metadata/${fieldModel.name}`,
-          value: {
-            value: fieldModel.value,
-            language: null,
-          },
-        });
+    this.formModels.forEach(
+      (fm: FormModels) => {
+        let lang = fm.language;
+        fm.forms.forEach(
+          (fieldModel: DynamicInputModel) => {
+            if (fieldModel.value !== this.dso.firstMetadataValue(fieldModel.name)) {
+              operations.push({
+                op: 'replace',
+                path: `/metadata/${fieldModel.name}`,
+                value: {
+                  value: fieldModel.value,
+                  language: lang,
+                },
+              });
+            }
+          }
+        )
       }
-    });
+    )
 
-    this.submitForm.emit({
-      dso: updatedDSO,
-      uploader: hasValue(this.uploaderComponent) ? this.uploaderComponent.uploader : undefined,
-      deleteLogo: this.markLogoForDeletion,
-      operations: operations,
-    });
+    console.log(updatedDSO.metadata)
+
+    // this.submitForm.emit({
+    //   dso: updatedDSO,
+    //   uploader: hasValue(this.uploaderComponent) ? this.uploaderComponent.uploader : undefined,
+    //   deleteLogo: this.markLogoForDeletion,
+    //   operations: operations,
+    // });
   }
 
   /**
    * Used the update translations of errors and labels on init and on language change
    */
-  private updateFieldTranslations() {
-    this.formModel.forEach(
-      (fieldModel: DynamicInputModel) => {
-        fieldModel.label = this.translate.instant(this.type.value + this.LABEL_KEY_PREFIX + fieldModel.id);
-        if (isNotEmpty(fieldModel.validators)) {
-          fieldModel.errorMessages = {};
-          Object.keys(fieldModel.validators).forEach((key) => {
-            fieldModel.errorMessages[key] = this.translate.instant(this.type.value + this.ERROR_KEY_PREFIX + fieldModel.id + '.' + key);
-          });
-        }
+  public updateFieldTranslations() {
+    this.formModels.forEach(
+      (fm: FormModels) => {
+        let lang = fm.language;
+        fm.forms.forEach(
+          (fieldModel: DynamicInputModel) => {
+            fieldModel.label = this.translate.instant(this.type.value + this.LABEL_KEY_PREFIX + fieldModel.id.split('-')[0]);
+            if(this.defaultLanguage !== this.currentLanguage && lang === this.defaultLanguage){
+              fieldModel.label = 'Default English ' + fieldModel.label;
+            }
+            if (isNotEmpty(fieldModel.validators)) {
+              fieldModel.errorMessages = {};
+              Object.keys(fieldModel.validators).forEach((key) => {
+                fieldModel.errorMessages[key] = this.translate.instant(this.type.value + this.ERROR_KEY_PREFIX + fieldModel.id.split('-')[0] + '.' + key);
+              });
+            }
+          }
+        )
       }
-    );
+    )
   }
 
   /**
@@ -288,6 +339,14 @@ export class ComColFormComponent<T extends Collection | Community> implements On
   public onUploadError() {
     this.notificationsService.error(null, this.translate.get(this.type.value + '.edit.logo.notifications.add.error'));
     this.finish.emit();
+  }
+
+  createDefaultLanguageLabel(): string{
+    const defaultLang: LangConfig = this.languages.find( language => language.code === this.defaultLanguage);
+    if(defaultLang) {
+      return defaultLang.label;
+    }
+    return null;
   }
 
   /**

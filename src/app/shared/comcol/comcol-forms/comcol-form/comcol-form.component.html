@@ -36,13 +36,80 @@
       </div>
     </ng-container>
   </div>
+  <hr>
 </div>
-<ds-form *ngIf="formModel"
-         [formId]="'comcol-form-id'"
-         [formModel]="formModel"
-         [displayCancel]="false"
-         (submitForm)="onSubmit()">
-  <button before (click)="back.emit()" class="btn btn-outline-secondary">
-    <i class="fas fa-arrow-left"></i> {{ type.value + '.edit.return' | translate }}
-  </button>
-</ds-form>
+<div class="container-fluid">
+  <div class="row m-0">
+    <div class="translations-container">
+      <label> Translations </label>
+    </div>
+  </div>
+  <div class="row m-0">
+    <ul class="nav nav-tabs justify-content-start">
+      <li *ngFor="let language of languages" class="nav-item">
+        <a *ngIf="language.code === defaultLanguage"
+          class="nav-link"
+          [ngClass]="{'active' : language.code === currentLanguage}"
+          (click)="this.currentLanguage = language.code; updateFieldTranslations()">
+          Default: {{ language.label }}
+        </a>
+        <a *ngIf="language.code !== defaultLanguage"
+          class="nav-link"
+          [ngClass]="{'active' : language.code === currentLanguage}"
+          (click)="this.currentLanguage = language.code; updateFieldTranslations()">
+          {{ language.label }}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>  
+<div class="row m-0" *ngIf="currentLanguage === defaultLanguage">
+  <div class="col-12 p-0">
+    <div *ngFor="let formModel of formModels">
+      <ds-form *ngIf="formModel.forms && formModel.language === defaultLanguage"
+      [formId]="'comcol-form-id' + formModel.language"
+      [formModel]="formModel.forms"
+      [displayCancel]="false"
+      [disabled]="false"
+      (submitForm)="onSubmit()"> 
+        <button before (click)="back.emit()" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> {{ type.value + '.edit.return' | translate }}
+        </button>
+      </ds-form>
+    </div>
+  </div>
+</div> 
+<div class="row m-0" *ngIf="currentLanguage !== defaultLanguage">
+  <div class="col-12 col-md-6 p-0">
+    <div *ngFor="let formModel of formModels">
+      <ds-form *ngIf="formModel.forms && formModel.language === currentLanguage"
+      [formId]="'comcol-form-id' + formModel.language"
+      [formModel]="formModel.forms"
+      [displayCancel]="false"
+      [disabled]="false"
+      (submitForm)="onSubmit()"> 
+        <button before (click)="back.emit()" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> {{ type.value + '.edit.return' | translate }}
+        </button>
+      </ds-form>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 p-0 disabled">
+    <div *ngFor="let formModel of formModels">
+      <ds-form *ngIf="formModel.forms && formModel.language === defaultLanguage"
+      [formId]="'comcol-form-id' + formModel.language"
+      [formModel]="formModel.forms"
+      [displayCancel]="false"
+      [disabled]="true"
+      (submitForm)="onSubmit()"> 
+        <button before (click)="back.emit()" class="btn btn-outline-secondary" [disabled]="true">
+        <i class="fas fa-arrow-left"></i> {{ type.value + '.edit.return' | translate }}
+        </button>
+      </ds-form>
+    </div>
+  </div> 
+</div>  
+
+
+
+

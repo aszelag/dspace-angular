@@ -15,6 +15,10 @@
   box-shadow: none !important;
 }
 
+.form-control:disabled {
+  color: #C0C0C0;
+}
+
 button.ds-form-add-more:focus {
   outline: none;
   box-shadow: none !important;
