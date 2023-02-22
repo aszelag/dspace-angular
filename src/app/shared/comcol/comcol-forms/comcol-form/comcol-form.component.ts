@@ -71,7 +71,6 @@ export class ComColFormComponent<T extends Collection | Community> implements On
    */
   currentLanguage: string = 'en';
 
-
   // All of the languages
   languages: LangConfig[];
 

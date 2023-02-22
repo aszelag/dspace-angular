@@ -50,14 +50,6 @@ export class CollectionFormComponent extends ComColFormComponent<Collection> imp
    */
   entityTypeSelection: DynamicSelectModel<string> = new DynamicSelectModel(collectionFormEntityTypeSelectionConfig);
 
-  /**
-   * The form models that represents the fields in the form
-   */
-  formModels: FormModels[] = [];
-
-  // All of the languages
-  languages: LangConfig[];
-
   public constructor(protected formService: DynamicFormService,
                      protected translate: TranslateService,
                      protected notificationsService: NotificationsService,

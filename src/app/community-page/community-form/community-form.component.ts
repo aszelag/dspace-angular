@@ -36,14 +36,6 @@ export class CommunityFormComponent extends ComColFormComponent<Community> imple
    */
   type = Community.type;
 
-  /**
-   * The form models that represents the fields in the form
-   */
-  formModels: FormModels[] = [];
-
-  // All of the languages
-  languages: LangConfig[];
-
   ngOnInit(): void {
     this.languages = environment.languages.filter((MyLangConfig) => MyLangConfig.active === true);
     if(this.languages) {
