@@ -266,12 +266,12 @@ export class ComColFormComponent<T extends Collection | Community> implements On
 
     console.log(updatedDSO.metadata)
 
-    // this.submitForm.emit({
-    //   dso: updatedDSO,
-    //   uploader: hasValue(this.uploaderComponent) ? this.uploaderComponent.uploader : undefined,
-    //   deleteLogo: this.markLogoForDeletion,
-    //   operations: operations,
-    // });
+    this.submitForm.emit({
+      dso: updatedDSO,
+      uploader: hasValue(this.uploaderComponent) ? this.uploaderComponent.uploader : undefined,
+      deleteLogo: this.markLogoForDeletion,
+      operations: operations,
+    });
   }
 
   /**
