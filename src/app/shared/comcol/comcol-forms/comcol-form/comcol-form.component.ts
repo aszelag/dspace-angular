@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { DynamicFormControlModel, DynamicFormService, DynamicInputModel, DynamicTextAreaModel } from '@ng-dynamic-forms/core';
+import { DynamicFormService, DynamicInputModel } from '@ng-dynamic-forms/core';
 import { TranslateService } from '@ngx-translate/core';
 import { FileUploader } from 'ng2-file-upload';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Subscription } from 'rxjs';
@@ -283,7 +283,9 @@ export class ComColFormComponent<T extends Collection | Community> implements On
           (fieldModel: DynamicInputModel) => {
             fieldModel.label = this.translate.instant(this.type.value + this.LABEL_KEY_PREFIX + fieldModel.id.split('-')[0]);
             if(this.defaultLanguage !== this.currentLanguage && lang === this.defaultLanguage){
-              fieldModel.label = 'Default English ' + fieldModel.label;
+              let deafult;
+              this.translate.get('collection.edit.tabs.default.language.head').subscribe (data => deafult = data);
+              fieldModel.label = deafult + " " + this.getLanguageLabel(this.defaultLanguage) + " " + fieldModel.label;
             }
             if (isNotEmpty(fieldModel.validators)) {
               fieldModel.errorMessages = {};
@@ -295,6 +297,17 @@ export class ComColFormComponent<T extends Collection | Community> implements On
         )
       }
     )
+  }
+
+  /**
+   * Get language label
+   */
+  private getLanguageLabel(language: string): string {
+    const languageLabel: LangConfig = this.languages.find((lang: LangConfig) => lang.code === language);
+    if(languageLabel) {
+      return languageLabel.label;
+    }
+    return null;
   }
 
   /**

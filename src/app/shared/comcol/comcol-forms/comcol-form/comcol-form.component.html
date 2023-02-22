@@ -41,7 +41,7 @@
 <div class="container-fluid">
   <div class="row m-0">
     <div class="translations-container">
-      <label> Translations </label>
+      <label> {{ 'collection.edit.tabs.translation.head' | translate }} </label>
     </div>
   </div>
   <div class="row m-0">
@@ -51,7 +51,7 @@
           class="nav-link"
           [ngClass]="{'active' : language.code === currentLanguage}"
           (click)="this.currentLanguage = language.code; updateFieldTranslations()">
-          Default: {{ language.label }}
+          {{ 'collection.edit.tabs.default.language.head' | translate }} {{ language.label }}
         </a>
         <a *ngIf="language.code !== defaultLanguage"
           class="nav-link"
