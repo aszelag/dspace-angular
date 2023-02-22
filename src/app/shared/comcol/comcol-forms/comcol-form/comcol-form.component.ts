@@ -24,7 +24,7 @@ import { NoContent } from '../../../../core/shared/NoContent.model';
 import { getFirstCompletedRemoteData } from '../../../../core/shared/operators';
 import { LangConfig } from 'src/config/lang-config.interface';
 import { FormModels } from './FormModels';
-import { Language } from '@material-ui/icons';
+
 
 /**
  * A form for creating and editing Communities or Collections
@@ -263,8 +263,6 @@ export class ComColFormComponent<T extends Collection | Community> implements On
         )
       }
     )
-
-    console.log(updatedDSO.metadata)
 
     this.submitForm.emit({
       dso: updatedDSO,
