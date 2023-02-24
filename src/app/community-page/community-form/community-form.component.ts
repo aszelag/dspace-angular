@@ -16,6 +16,8 @@ import { ObjectCacheService } from '../../core/cache/object-cache.service';
 import { environment } from '../../../environments/environment';
 import { FormModels } from 'src/app/shared/comcol/comcol-forms/comcol-form/FormModels';
 import { LangConfig } from 'src/config/lang-config.interface';
+import { ConfigurationDataService } from 'src/app/core/data/configuration-data.service';
+import { getFirstCompletedRemoteData } from 'src/app/core/shared/operators';
 
 /**
  * Form used for creating and editing communities
@@ -38,6 +40,13 @@ export class CommunityFormComponent extends ComColFormComponent<Community> imple
 
   ngOnInit(): void {
     this.languages = environment.languages.filter((MyLangConfig) => MyLangConfig.active === true);
+    const defaultLanguage$ = this.configService.findByPropertyName('default.locale').pipe(
+      getFirstCompletedRemoteData()
+    );
+    defaultLanguage$.subscribe(data => {
+      this.defaultLanguage = data.payload.values[0];
+      this.currentLanguage = this.defaultLanguage;
+    });
     if(this.languages) {
       this.languages.forEach(
         (language: LangConfig) => {
@@ -49,6 +58,15 @@ export class CommunityFormComponent extends ComColFormComponent<Community> imple
         }
       )
     }
+    this.formModels.forEach(
+      (fm: FormModels) => {
+        fm.forms.forEach(
+          (fieldModel: DynamicInputModel) => {
+            fieldModel.value = this.dso.firstMetadataValue(fieldModel.name);
+          }
+        )
+      }
+    )
     this.updateFieldTranslations();
   }
 
@@ -94,7 +112,8 @@ export class CommunityFormComponent extends ComColFormComponent<Community> imple
                      protected authService: AuthService,
                      protected dsoService: CommunityDataService,
                      protected requestService: RequestService,
+                     protected configService: ConfigurationDataService,
                      protected objectCache: ObjectCacheService) {
-    super(formService, translate, notificationsService, authService, requestService, objectCache);
+    super(formService, translate, notificationsService, authService, requestService, configService, objectCache);
   }
 }

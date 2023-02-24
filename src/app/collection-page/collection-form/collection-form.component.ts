@@ -18,12 +18,13 @@ import { ObjectCacheService } from '../../core/cache/object-cache.service';
 import { EntityTypeDataService } from '../../core/data/entity-type-data.service';
 import { ItemType } from '../../core/shared/item-relationships/item-type.model';
 import { MetadataValue } from '../../core/shared/metadata.models';
-import { getFirstSucceededRemoteListPayload } from '../../core/shared/operators';
+import { getFirstCompletedRemoteData, getFirstSucceededRemoteListPayload } from '../../core/shared/operators';
 import { collectionFormEntityTypeSelectionConfig, collectionFormModels, createCollectionFormModels, } from './collection-form.models';
 import { NONE_ENTITY_TYPE } from '../../core/shared/item-relationships/item-type.resource-type';
 import { LangConfig } from 'src/config/lang-config.interface';
 import { FormModels } from 'src/app/shared/comcol/comcol-forms/comcol-form/FormModels';
 import { environment } from 'src/environments/environment';
+import { ConfigurationDataService } from 'src/app/core/data/configuration-data.service';
 
 /**
  * Form used for creating and editing collections
@@ -57,13 +58,21 @@ export class CollectionFormComponent extends ComColFormComponent<Collection> imp
                      protected dsoService: CommunityDataService,
                      protected requestService: RequestService,
                      protected objectCache: ObjectCacheService,
+                     protected configService: ConfigurationDataService,
                      protected entityTypeService: EntityTypeDataService) {
-    super(formService, translate, notificationsService, authService, requestService, objectCache);
+    super(formService, translate, notificationsService, authService, requestService, configService, objectCache);
   }
 
   ngOnInit() {
     this.languages = environment.languages.filter((MyLangConfig) => MyLangConfig.active === true);
-
+    const defaultLanguage$ = this.configService.findByPropertyName('default.locale').pipe(
+      getFirstCompletedRemoteData()
+    );
+    defaultLanguage$.subscribe(data => {
+      this.defaultLanguage = data.payload.values[0];
+      this.currentLanguage = this.defaultLanguage;
+    });
+    
     let currentRelationshipValue: MetadataValue[];
     if (this.dso && this.dso.metadata) {
       currentRelationshipValue = this.dso.metadata['dspace.entity.type'];

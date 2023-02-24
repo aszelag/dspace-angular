@@ -160,9 +160,7 @@ export class FormComponent implements OnDestroy, OnInit {
 
     this.formModel.forEach(
       (fm: DynamicFormControlModel) => {
-        if(fm.name !== 'dspace.entity.type'){
-          fm.disabled = this.disabled;
-        } 
+        fm.disabled = this.disabled;
       }
     )
 

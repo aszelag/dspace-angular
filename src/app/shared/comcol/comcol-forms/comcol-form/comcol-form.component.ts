@@ -24,6 +24,7 @@ import { NoContent } from '../../../../core/shared/NoContent.model';
 import { getFirstCompletedRemoteData } from '../../../../core/shared/operators';
 import { LangConfig } from 'src/config/lang-config.interface';
 import { FormModels } from './FormModels';
+import { ConfigurationDataService } from 'src/app/core/data/configuration-data.service';
 
 
 /**
@@ -64,12 +65,12 @@ export class ComColFormComponent<T extends Collection | Community> implements On
   /**
    * The current page outlet string
    */
-  defaultLanguage: string = 'en';
+  defaultLanguage: string;
 
   /**
    * The current page outlet string
    */
-  currentLanguage: string = 'en';
+  currentLanguage: string;
 
   // All of the languages
   languages: LangConfig[];
@@ -139,6 +140,7 @@ export class ComColFormComponent<T extends Collection | Community> implements On
                      protected notificationsService: NotificationsService,
                      protected authService: AuthService,
                      protected requestService: RequestService,
+                     protected configService: ConfigurationDataService,
                      protected objectCache: ObjectCacheService) {
   }
 
