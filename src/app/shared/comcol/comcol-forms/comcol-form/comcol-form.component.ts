@@ -13,7 +13,7 @@ import { RestRequestMethod } from '../../../../core/data/rest-request-method';
 import { Bitstream } from '../../../../core/shared/bitstream.model';
 import { Collection } from '../../../../core/shared/collection.model';
 import { Community } from '../../../../core/shared/community.model';
-import { MetadataMap, MetadataValue } from '../../../../core/shared/metadata.models';
+import { MetadataMap, MetadataValue, MetadatumViewModel } from '../../../../core/shared/metadata.models';
 import { ResourceType } from '../../../../core/shared/resource-type';
 import { hasValue, isNotEmpty } from '../../../empty.util';
 import { NotificationsService } from '../../../notifications/notifications.service';
@@ -149,7 +149,7 @@ export class ComColFormComponent<T extends Collection | Community> implements On
       (fm: FormModels) => {
         fm.forms.forEach(
           (fieldModel: DynamicInputModel) => {
-            fieldModel.value = this.dso.firstMetadataValue(fieldModel.name);
+            fieldModel.value = this.findValue(fm.language, fieldModel, this.dso.metadataAsList)
           }
         )
       }
@@ -251,19 +251,22 @@ export class ComColFormComponent<T extends Collection | Community> implements On
         fm.forms.forEach(
           (fieldModel: DynamicInputModel) => {
             if (fieldModel.value !== this.dso.firstMetadataValue(fieldModel.name)) {
-              operations.push({
-                op: 'replace',
-                path: `/metadata/${fieldModel.name}`,
-                value: {
-                  value: fieldModel.value,
-                  language: lang,
-                },
-              });
+              if(fieldModel.value != null) {
+                operations.push({
+                  op: 'add',
+                  path: `/metadata/${fieldModel.name}/${this.formModels.indexOf(fm)}`,
+                  value: {
+                    value: fieldModel.value,
+                    language: lang
+                  },
+                });
+              }
             }
           }
         )
       }
     )
+    console.log(operations)
 
     this.submitForm.emit({
       dso: updatedDSO,
@@ -368,5 +371,14 @@ export class ComColFormComponent<T extends Collection | Community> implements On
     this.subs
       .filter((subscription) => hasValue(subscription))
       .forEach((subscription) => subscription.unsubscribe());
+  }
+
+  private findValue(language: string, fieldModel: DynamicInputModel, metadataList: MetadatumViewModel[]): string {
+    const filterdMetadata: MetadatumViewModel[] = metadataList.filter(metadata => metadata.language == language && metadata.key == fieldModel.name);
+    if(filterdMetadata && filterdMetadata.length > 0) {
+      return filterdMetadata[0].value;
+    } else {
+      return null;
+    }
   }
 }
