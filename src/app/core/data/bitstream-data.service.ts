@@ -237,6 +237,15 @@ export class BitstreamDataService extends IdentifiableDataService<Bitstream> imp
   }
 
   /**
+   * Send a put request for a specified object
+   * @param {T} object The object to send a patch request for
+   * @param {Operation[]} operations The patch operations to be performed
+   */
+  public put(object: Bitstream, operations: []): Observable<RemoteData<Bitstream>> {
+    return this.patchData.put(object, operations);
+  }
+
+  /**
    * Add a new patch to the object cache
    * The patch is derived from the differences between the given object and its version in the object cache
    * @param {DSpaceObject} object The given object

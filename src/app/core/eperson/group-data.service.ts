@@ -374,6 +374,10 @@ export class GroupDataService extends IdentifiableDataService<Group> implements 
     return this.patchData.patch(object, operations);
   }
 
+  put(object: Group, operations: Operation[]): Observable<RemoteData<Group>> {
+    return this.patchData.put(object, operations);
+  }
+
   update(object: Group): Observable<RemoteData<Group>> {
     return this.patchData.update(object);
   }

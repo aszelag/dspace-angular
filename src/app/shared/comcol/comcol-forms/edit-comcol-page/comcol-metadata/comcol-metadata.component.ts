@@ -50,7 +50,6 @@ export class ComcolMetadataComponent<TDomain extends Community | Collection> imp
    * @param event   The event returned by the community/collection form. Contains the new dso and logo uploader
    */
   onSubmit(event) {
-
     const uploader = event.uploader;
     const deleteLogo = event.deleteLogo;
 
@@ -63,7 +62,7 @@ export class ComcolMetadataComponent<TDomain extends Community | Collection> imp
     }
 
     if (!isEmpty(event.operations)) {
-      this.dsoDataService.patch(event.dso, event.operations).pipe(getFirstCompletedRemoteData())
+      this.dsoDataService.put(event.dso, event.operations).pipe(getFirstCompletedRemoteData())
         .subscribe(async (response: RemoteData<DSpaceObject>) => {
           if (response.hasSucceeded) {
             if (!newLogo && !deleteLogo) {

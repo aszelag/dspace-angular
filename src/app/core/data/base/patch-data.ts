@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { RemoteData } from '../remote-data';
 import { find, map, mergeMap } from 'rxjs/operators';
 import { hasNoValue, hasValue, isNotEmpty } from '../../../shared/empty.util';
-import { PatchRequest } from '../request.models';
+import { PatchRequest, PutRequest } from '../request.models';
 import { getFirstSucceededRemoteData, getRemoteDataPayload } from '../../shared/operators';
 import { ChangeAnalyzer } from '../change-analyzer';
 import { RequestService } from '../request.service';
@@ -32,6 +32,13 @@ export interface PatchData<T extends CacheableObject> {
    * @param {Operation[]} operations The patch operations to be performed
    */
   patch(object: T, operations: Operation[]): Observable<RemoteData<T>>;
+
+   /**
+   * Send a put request for a specified object
+   * @param {T} object The object to send a patch request for
+   * @param {Operation[]} operations The patch operations to be performed
+   */
+   put(object: T, operations: Operation[]): Observable<RemoteData<T>>;
 
   /**
    * Add a new patch to the object cache
@@ -95,6 +102,31 @@ export class PatchDataImpl<T extends CacheableObject> extends IdentifiableDataSe
       find((href: string) => hasValue(href)),
     ).subscribe((href: string) => {
       const request = new PatchRequest(requestId, href, operations);
+      if (hasValue(this.responseMsToLive)) {
+        request.responseMsToLive = this.responseMsToLive;
+      }
+      this.requestService.send(request);
+    });
+
+    return this.rdbService.buildFromRequestUUIDAndAwait(requestId, () => this.invalidateByHref(object._links.self.href));
+  }
+
+  /**
+   * Send a put request for a specified object
+   * @param {T} object The object to send a put request for
+   * @param {Operation[]} operations The patch operations to be performed
+   */
+  put(object: T, operations: Operation[]): Observable<RemoteData<T>> {
+    const requestId = this.requestService.generateRequestId();
+
+    const hrefObs = this.halService.getEndpoint(this.linkPath).pipe(
+      map((endpoint: string) => this.getIDHref(endpoint, object.uuid)),
+    );
+
+    hrefObs.pipe(
+      find((href: string) => hasValue(href)),
+    ).subscribe((href: string) => {
+      const request = new PutRequest(requestId, href, operations);
       if (hasValue(this.responseMsToLive)) {
         request.responseMsToLive = this.responseMsToLive;
       }

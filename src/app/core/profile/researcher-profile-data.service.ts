@@ -196,6 +196,15 @@ export class ResearcherProfileDataService extends IdentifiableDataService<Resear
   }
 
   /**
+   * Send a put request for a specified object
+   * @param {T} object The object to send a put request for
+   * @param {Operation[]} operations The put operations to be performed
+   */
+  public put(object: ResearcherProfile, operations: Operation[]): Observable<RemoteData<ResearcherProfile>> {
+    return this.patchData.put(object, operations);
+  }
+
+  /**
    * Add a new patch to the object cache
    * The patch is derived from the differences between the given object and its version in the object cache
    * @param {DSpaceObject} object The given object

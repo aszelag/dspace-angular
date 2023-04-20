@@ -29,6 +29,7 @@ import { RemoteDataBuildService } from '../cache/builders/remote-data-build.serv
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import { DSOChangeAnalyzer } from './dso-change-analyzer.service';
 import { Operation } from 'fast-json-patch';
+import { PutData, PutDataImpl } from './base/put-data';
 
 export abstract class ComColDataService<T extends Community | Collection> extends IdentifiableDataService<T> implements CreateData<T>, FindAllData<T>, SearchData<T>, PatchData<T>, DeleteData<T> {
   private createData: CreateData<T>;
@@ -36,6 +37,7 @@ export abstract class ComColDataService<T extends Community | Collection> extend
   private searchData: SearchData<T>;
   private patchData: PatchData<T>;
   private deleteData: DeleteData<T>;
+  private putData: PutData<T>;
 
   protected constructor(
     protected linkPath: string,
@@ -54,6 +56,7 @@ export abstract class ComColDataService<T extends Community | Collection> extend
     this.searchData = new SearchDataImpl<T>(this.linkPath, requestService, rdbService, objectCache, halService, this.responseMsToLive);
     this.patchData = new PatchDataImpl<T>(this.linkPath, requestService, rdbService, objectCache, halService, comparator, this.responseMsToLive, this.constructIdEndpoint);
     this.deleteData = new DeleteDataImpl(this.linkPath, requestService, rdbService, objectCache, halService, notificationsService, this.responseMsToLive, this.constructIdEndpoint);
+    this.putData = new PutDataImpl<T>(this.linkPath, requestService, rdbService, objectCache, halService,  this.responseMsToLive);
   }
 
   /**
@@ -225,6 +228,15 @@ export abstract class ComColDataService<T extends Community | Collection> extend
    */
   public patch(object: T, operations: []): Observable<RemoteData<T>> {
     return this.patchData.patch(object, operations);
+  }
+
+  /**
+   * Send a put request for a specified object
+   * @param {T} object The object to send a put request for
+   * @param {Operation[]} operations The patch operations to be performed
+   */
+  public put(object: T, operations: []): Observable<RemoteData<T>> {
+    return this.patchData.put(object, operations);
   }
 
   /**

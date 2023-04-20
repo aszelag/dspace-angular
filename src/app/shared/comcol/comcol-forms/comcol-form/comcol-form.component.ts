@@ -251,16 +251,14 @@ export class ComColFormComponent<T extends Collection | Community> implements On
         fm.forms.forEach(
           (fieldModel: DynamicInputModel) => {
             if (fieldModel.value !== this.dso.firstMetadataValue(fieldModel.name)) {
-              if(fieldModel.value != null) {
-                operations.push({
-                  op: 'add',
-                  path: `/metadata/${fieldModel.name}/${this.formModels.indexOf(fm)}`,
-                  value: {
-                    value: fieldModel.value,
-                    language: lang
-                  },
-                });
-              }
+              operations.push({
+                op: null,
+                path: `/metadata/${fieldModel.name}`,
+                value: {
+                  value: fieldModel.value,
+                  language: lang
+                },
+              });
             }
           }
         )
