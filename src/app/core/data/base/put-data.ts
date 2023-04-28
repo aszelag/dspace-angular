@@ -56,7 +56,7 @@ export class PutDataImpl<T extends CacheableObject> extends BaseDataService<T> i
   put(object: T): Observable<RemoteData<T>> {
     const requestId = this.requestService.generateRequestId();
     const serializedObject = new DSpaceSerializer(object.constructor as GenericConstructor<{}>).serialize(object);
-    const request = new PutRequest(requestId, object._links.self.href, serializedObject);
+    const request = new PutRequest(requestId, object._links.self.href, serializedObject, null, requestId);
 
     if (hasValue(this.responseMsToLive)) {
       request.responseMsToLive = this.responseMsToLive;

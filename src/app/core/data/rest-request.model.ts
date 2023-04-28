@@ -15,6 +15,7 @@ export abstract class RestRequest {
         public method: RestRequestMethod = RestRequestMethod.GET,
         public body?: any,
         public options?: HttpOptions,
+        public id?: string,
     ) {
     }
 }

@@ -145,6 +145,7 @@ export class ComColFormComponent<T extends Collection | Community> implements On
   }
 
   ngOnInit(): void {
+    console.log(this.dso)
     this.formModels.forEach(
       (fm: FormModels) => {
         fm.forms.forEach(

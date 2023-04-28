@@ -68,9 +68,10 @@ export class PutRequest extends DSpaceRestRequest {
     public uuid: string,
     public href: string,
     public body?: any,
-    public options?: HttpOptions
+    public options?: HttpOptions,
+    public id?: string,
   ) {
-    super(uuid, href, RestRequestMethod.PUT, body);
+    super(uuid, href, RestRequestMethod.PUT, body, null, id);
   }
 }
 
